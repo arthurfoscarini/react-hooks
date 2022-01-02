@@ -4,10 +4,10 @@
 import * as React from 'react'
 import {useLocalStorageState} from '../utils'
 
-function Board({onClick, squares}) {
+function Board({selectSquare, squares}) {
   function renderSquare(i) {
     return (
-      <button className="square" onClick={() => onClick(i)}>
+      <button className="square" onClick={() => selectSquare(i)}>
         {squares[i]}
       </button>
     )
@@ -35,50 +35,33 @@ function Board({onClick, squares}) {
 }
 
 function Game() {
-  const [history, setHistory] = useLocalStorageState('tic-tac-toe:history', [
+  const [squares, setSquares] = useLocalStorageState(
+    'squares',
     Array(9).fill(null),
-  ])
-  const [currentStep, setCurrentStep] = useLocalStorageState(
-    'tic-tac-toe:step',
-    0,
   )
-  console.log(history)
-  console.log(history[currentStep])
-  const currentSquares = history[currentStep]
 
-  const nextValue = calculateNextValue(currentSquares)
-  const winner = calculateWinner(currentSquares)
-  const status = calculateStatus(winner, currentSquares, nextValue)
+  const currentSquares = []
+
+  const nextValue = calculateNextValue(squares)
+  const winner = calculateWinner(squares)
+  const status = calculateStatus(winner, squares, nextValue)
 
   function selectSquare(square) {
-    if (winner || currentSquares[square]) {
+    if (winner || squares[square]) {
       return
     }
-    const newHistory = history.slice(0, currentStep + 1)
-    const squares = [...currentSquares]
-    squares[square] = nextValue
-    setHistory([...newHistory, squares])
-    setCurrentStep(newHistory.length)
+    const squaresCopy = [...squares]
+    squaresCopy[square] = nextValue
+    setSquares(squaresCopy)
   }
 
   function restart() {
     // 🐨 reset the squares
     // 💰 `Array(9).fill(null)` will do it!
-    setHistory([Array(9).fill(null)])
-    setCurrentStep(0)
+    setSquares(Array(9).fill(null))
   }
 
-  const moves = history.map((squareStep, step) => {
-    const description = step === 0 ? 'Go to game start' : `Go to move #${step}`
-    const isCurrentStep = currentStep === step
-    return (
-      <li key={step}>
-        <button disabled={isCurrentStep} onClick={() => setCurrentStep(step)}>
-          {description} {isCurrentStep ? '(current)' : null}
-        </button>
-      </li>
-    )
-  })
+  const moves = () => {}
 
   return (
     <div className="game">
